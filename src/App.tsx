@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Board from './components/Board';
 import Scoreboard from './components/Scoreboard';
+import { minimax } from './ai/minimax';
 import './styles/main.css';
 
 const initialSquares = Array(9).fill(null);
@@ -11,10 +12,28 @@ const App: React.FC = () => {
     const [score, setScore] = useState({ X: 0, O: 0 });
     const [gameOver, setGameOver] = useState(false);
     const [theme, setTheme] = useState<'light' | 'dark'>('light');
+    const [mode, setMode] = useState<'pvp' | 'ai'>('ai');
+    const aiPlayer = 'O';
 
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', theme);
     }, [theme]);
+
+    useEffect(() => {
+        if (
+            mode === 'ai' &&
+            !gameOver &&
+            !isXNext // IA es 'O'
+        ) {
+            const bestMove = getBestMove(squares, aiPlayer);
+            if (bestMove !== -1) {
+                setTimeout(() => {
+                    handleSquareClick(bestMove, true);
+                }, 500);
+            }
+        }
+        // eslint-disable-next-line
+    }, [squares, isXNext, gameOver, mode]);
 
     const calculateWinner = (squares: Array<string | null>) => {
         const lines = [
@@ -36,8 +55,9 @@ const App: React.FC = () => {
         return null;
     };
 
-    const handleSquareClick = (index: number) => {
+    const handleSquareClick = (index: number, isAI = false) => {
         if (squares[index] || gameOver) return;
+        if (mode === 'ai' && !isXNext && !isAI) return;
 
         const newSquares = squares.slice();
         newSquares[index] = isXNext ? 'X' : 'O';
@@ -56,11 +76,34 @@ const App: React.FC = () => {
         }
     };
 
+    function getBestMove(board: Array<string | null>, player: string): number {
+        let bestScore = -Infinity;
+        let move = -1;
+        for (let i = 0; i < board.length; i++) {
+            if (!board[i]) {
+                const newBoard = board.slice();
+                newBoard[i] = player;
+                const score = minimax(newBoard.map(x => x || ''), 0, false);
+                if (score > bestScore) {
+                    bestScore = score;
+                    move = i;
+                }
+            }
+        }
+        return move;
+    }
+
     const resetGame = () => {
         setSquares(initialSquares);
         setIsXNext(true);
         setGameOver(false);
     };
+
+    // Reiniciar todo al cambiar de modo
+    useEffect(() => {
+        resetGame();
+        setScore({ X: 0, O: 0 });
+    }, [mode]);
 
     return (
         <div className="app">
@@ -71,6 +114,25 @@ const App: React.FC = () => {
                 >
                     <option value="light">🌞 Claro</option>
                     <option value="dark">🌙 Oscuro</option>
+                </select>
+            </div>
+            <div style={{ marginBottom: 16 }}>
+                <select
+                    value={mode}
+                    onChange={e => setMode(e.target.value as 'pvp' | 'ai')}
+                    style={{
+                        borderRadius: 8,
+                        padding: '6px 12px',
+                        border: '1px solid #e0e7ef',
+                        background: 'var(--score-bg)',
+                        color: 'var(--text)',
+                        fontWeight: 500,
+                        outline: 'none',
+                        cursor: 'pointer'
+                    }}
+                >
+                    <option value="ai">Jugador vs IA</option>
+                    <option value="pvp">Jugador vs Jugador</option>
                 </select>
             </div>
             <h1>Tres en Raya</h1>

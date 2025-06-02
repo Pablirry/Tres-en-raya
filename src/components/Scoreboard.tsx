@@ -7,16 +7,11 @@ interface ScoreboardProps {
     score2: number;
 }
 
-const Scoreboard: React.FC<ScoreboardProps> = ({ player1, player2, score1, score2 }) => {
-    return (
-        <div className="scoreboard">
-            <h2>Scoreboard</h2>
-            <div className="score">
-                <span>{player1}: {score1}</span>
-                <span>{player2}: {score2}</span>
-            </div>
-        </div>
-    );
-};
+const Scoreboard: React.FC<ScoreboardProps> = ({ player1, player2, score1, score2 }) => (
+    <div className="scoreboard">
+        <span>{player1}: {score1}</span>
+        <span>{player2}: {score2}</span>
+    </div>
+);
 
 export default Scoreboard;

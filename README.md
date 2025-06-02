@@ -49,9 +49,3 @@ Para iniciar la aplicación, utiliza el siguiente comando:
 npm start
 ```
 Esto abrirá la aplicación en tu navegador predeterminado.
-
-## Contribuciones
-Las contribuciones son bienvenidas. Si deseas mejorar el proyecto, por favor abre un issue o envía un pull request.
-
-## Licencia
-Este proyecto está bajo la Licencia MIT.
