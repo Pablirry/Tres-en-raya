@@ -77,20 +77,32 @@ const App: React.FC = () => {
     };
 
     function getBestMove(board: Array<string | null>, player: string): number {
-        let bestScore = -Infinity;
-        let move = -1;
+        // Margen de error: 30% de las veces la IA elige un movimiento subóptimo
+        const errorMargin = 0.3;
+        const moves: { idx: number, score: number }[] = [];
+
         for (let i = 0; i < board.length; i++) {
             if (!board[i]) {
                 const newBoard = board.slice();
                 newBoard[i] = player;
                 const score = minimax(newBoard.map(x => x || ''), 0, false);
-                if (score > bestScore) {
-                    bestScore = score;
-                    move = i;
-                }
+                moves.push({ idx: i, score });
             }
         }
-        return move;
+
+        // Ordena los movimientos de mejor a peor
+        moves.sort((a, b) => b.score - a.score);
+
+        if (moves.length === 0) return -1;
+
+        if (Math.random() < errorMargin && moves.length > 1) {
+            // Elige entre el segundo o tercer mejor movimiento (si existen)
+            const suboptimalMoves = moves.slice(1, Math.min(3, moves.length));
+            return suboptimalMoves[Math.floor(Math.random() * suboptimalMoves.length)].idx;
+        }
+
+        // Movimiento óptimo
+        return moves[0].idx;
     }
 
     const resetGame = () => {
